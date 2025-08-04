@@ -4,7 +4,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
-const BASE_URL = 'https://whatsapp-server-3v0l.onrender.com';
+const BASE_URL = 'https://whatsapp-server-ft3j.onrender.com';
+
 
 
 function normalizeWhatsAppNumber(number) {
