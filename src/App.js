@@ -6,8 +6,6 @@ import './App.css';
 
 const BASE_URL = 'https://whatsapp-server-ft3j.onrender.com';
 
-
-
 function normalizeWhatsAppNumber(number) {
   let n = number.trim().replace(/\D/g, '');
   if (n.startsWith('0')) n = '91' + n.slice(1);
@@ -21,6 +19,7 @@ function App() {
   const [sending, setSending] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [qrCode, setQrCode] = useState(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const checkStatus = async () => {
     try {
@@ -28,7 +27,7 @@ function App() {
       setIsConnected(res.data.ready === true);
 
       if (!res.data.ready) {
-        const qrRes = await axios.get(`${BASE_URL}/whatsapp/qr`);
+        const qrRes = await axios.get(`${BASE_URL}/qr`);
         setQrCode(qrRes.data.qr);
       } else {
         setQrCode(null);
@@ -79,6 +78,26 @@ function App() {
     }
   };
 
+  const handleLogout = async () => {
+    const confirm = window.confirm('Are you sure you want to logout WhatsApp session?');
+    if (!confirm) return;
+
+    setLoggingOut(true);
+    try {
+      const res = await axios.post(`${BASE_URL}/whatsapp/logout`);
+      if (res.data?.success) {
+        toast.success('✅ WhatsApp logged out');
+        await checkStatus(); // Refresh QR/status
+      } else {
+        toast.error('❌ Failed to logout');
+      }
+    } catch (err) {
+      toast.error('❌ Error during logout');
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
   return (
     <div className="App">
       <ToastContainer />
@@ -92,6 +111,16 @@ function App() {
             <p className="mb-2 text-sm text-gray-600">Scan QR to connect:</p>
             <img src={qrCode} alt="WhatsApp QR" className="w-64 h-64 border" />
           </div>
+        )}
+
+        {isConnected && (
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="mb-6 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition duration-200"
+          >
+            {loggingOut ? 'Logging out...' : '🔒 Logout WhatsApp'}
+          </button>
         )}
 
         <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
